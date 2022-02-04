@@ -1,13 +1,22 @@
-##Maybe add a check for xaget already installe
 - name: Check if agent is installed
   stat:
     path: /opt/fireeye/bin/xagt
   register: xagt_exists
 
+##Perhaps change this to download from network storage instead
+- name: create directory to store files on
+  file:
+    path: '/tmp/FE'
+    owner: root
+    group: root
+    mode: 0755
+    state: directory
+
 - name: run when Debian OS Family
   import_tasks: debian.yml
   when: (ansible_facts['os_family'] == "Debian") and (xagt_exists == False)
 
+##Need to check on status of Rocky Linux, depending on ansible version, it might not be classified in RHEL family.
 - name: run when RedHat OS Family
   import_tasks: redhat.yml
   when: (ansible_facts['os_family'] == "RedHat") and (xagt_exists == False)
@@ -15,3 +24,15 @@
 - name: run when Darwin OS Family
   import_tasks: macos.yml
   when: (ansible_facts['os_family'] == "Darwin") and (xagt_exists == False)
+
+- name: start xagt service
+  service:
+    name: xagt
+    state: started
+    enabled: yes
+  when: (ansible_facts['os_family'] == "RedHat") or (ansible_facts['os_family'] == "Debian")
+
+- name: remove install files
+    file:
+      path: '/tmp/FE'
+      state: absent

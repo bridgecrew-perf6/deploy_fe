@@ -1,0 +1,18 @@
+- name: copy rpm files
+  copy:
+     src: {{ item }}
+     dest: /tmp/FE
+     owner: root
+     group: root
+     mode: 0644
+   with_items:
+     - xagt_34.28.1-1.ubuntu16_amd64.deb
+     - agent_config.json
+
+- name: install deb
+  apt:
+    dev: /tmp/FE/xagt_34.28.1-1.ubuntu16_amd64.deb
+
+- name: install using xagt command
+  shell:
+    cmd: '/opt/fireeye/bin/xagt -i /tmp/FE/agent_config.json'
