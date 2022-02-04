@@ -1,0 +1,17 @@
+##Maybe add a check for xaget already installe
+- name: Check if agent is installed
+  stat:
+    path: /opt/fireeye/bin/xagt
+  register: xagt_exists
+
+- name: run when Debian OS Family
+  import_tasks: debian.yml
+  when: (ansible_facts['os_family'] == "Debian") and (xagt_exists == False)
+
+- name: run when RedHat OS Family
+  import_tasks: redhat.yml
+  when: (ansible_facts['os_family'] == "RedHat") and (xagt_exists == False)
+
+- name: run when Darwin OS Family
+  import_tasks: macos.yml
+  when: (ansible_facts['os_family'] == "Darwin") and (xagt_exists == False)

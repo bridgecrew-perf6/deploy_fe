@@ -1,0 +1,51 @@
+#!/bin/bash
+
+if [[ "$EUID" -ne "0" ]]; then
+    echo "Installation requires root privileges"
+    exit 1
+fi
+
+if [[ ! -x $(which rpm) ]]; then
+    echo "rpm not in path or is not executable"
+    exit 1
+fi
+
+readonly init_version=$(/proc/1/exe --version | head -n 1)
+if [[ $(expr "$init_version" : ".*upstart") -ne 0 ]]; then
+    agent_rpm=xagt-34.28.1-1.el6.x86_64.rpm
+elif [[ $(expr "$init_version" : ".*systemd") -ne 0 ]]; then
+    agent_rpm=xagt-34.28.1-1.el7.x86_64.rpm
+else
+    echo "Unexpected: ($init_version)"
+    exit 1
+fi
+
+if [[ ! -f "$(dirname $0)/$agent_rpm" ]]; then
+    echo "Could not find agent RPM package in $(dirname $0)"
+    exit 1
+fi
+
+# Assume service gets redirected to systemctl when appropriate
+service xagt status &> /dev/null
+need_restart=$?
+service xagt stop &> /dev/null
+# Service stop completed above, but send TERM to any remaining processes
+pkill -x xagt &> /dev/null
+
+# RPM output is useful in upgrade log, not so nice interactively
+if [[ -t 1 ]]; then
+    rpm_verbosity=""
+else
+    rpm_verbosity="-vvvvvv"
+fi
+
+rpm --upgrade "$(dirname $0)/$agent_rpm" $rpm_verbosity
+
+if [[ "$?" -ne "0" ]]; then
+    echo "Installation failed"
+    exit 1
+fi
+
+if [[ "$need_restart" -eq "0" ]]; then
+    service xagt start &> /dev/null
+fi
