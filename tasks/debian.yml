@@ -1,17 +1,17 @@
-- name: copy rpm files
+- name: copy deb files
   copy:
-     src: {{ item }}
-     dest: /tmp/FE
-     owner: root
-     group: root
-     mode: 0644
-   with_items:
-     - xagt_34.28.1-1.ubuntu16_amd64.deb
-     - agent_config.json
+    src: "{{ item }}"
+    dest: /tmp/FE
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - xagt_34.28.1-1.ubuntu16_amd64.deb
+    - agent_config.json
 
-- name: install deb
+- name: install deb package
   apt:
-    dev: /tmp/FE/xagt_34.28.1-1.ubuntu16_amd64.deb
+    deb: /tmp/FE/xagt_34.28.1-1.ubuntu16_amd64.deb
 
 - name: install using xagt command
   shell:

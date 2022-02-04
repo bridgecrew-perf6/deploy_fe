@@ -1,20 +1,20 @@
 - name: copy rpm files
   copy:
-     src: {{ item }}
-     dest: /tmp/FE
-     owner: root
-     group: root
-     mode: 0644
-   with_items:
-     - xagt-34.28.1-1.el7.x86_64.rpm
-     - agent_config.json
+    src: "{{ item }}"
+    dest: /tmp/FE
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - xagt-34.28.1-1.el7.x86_64.rpm
+    - agent_config.json
 
 - name: install rpm
   yum:
     name: /tmp/FE/xagt-34.28.1-1.el7.x86_64.rpm
     state: present
+    disable_gpg_check: yes
 
 - name: install using xagt command
   shell:
     cmd: '/opt/fireeye/bin/xagt -i /tmp/FE/agent_config.json'
-- 

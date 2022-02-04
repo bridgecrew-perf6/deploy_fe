@@ -6,4 +6,4 @@
   gather_facts: yes
   tasks:
     - import_role:
-      name: deploy_wp
+        name: deploy_fe
